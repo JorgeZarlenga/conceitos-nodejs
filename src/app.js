@@ -35,7 +35,7 @@ app.post("/repositories", (request, response) => {
 app.put("/repositories/:id", (request, response) => {
 
   const {id} = request.params;
-  const {title, url, techs} = request.body;
+  const {title, url, techs, likes} = request.body;
 
   const repositoryIndex = repositories.findIndex(repository => repository.id === id);
 
@@ -47,8 +47,10 @@ app.put("/repositories/:id", (request, response) => {
   const repository = {
     title,
     url,
-    techs,
+    techs
   };
+
+  repository.likes = 0;
 
   repositories[repositoryIndex] = repository;
 
@@ -56,10 +58,24 @@ app.put("/repositories/:id", (request, response) => {
 });
 
 app.delete("/repositories/:id", (request, response) => {
-  // TODO
+  
+  const {id} = request.params;
+  const {title, url, techs} = request.body;
+
+  const repositoryIndex = repositories.findIndex(repository => repository.id === id);
+
+  if(repositoryIndex < 0)
+  {
+    return response.status(400).json({error: 'Project not found'});
+  }
+
+  repositories.splice(repositoryIndex, repositories.length);
+
+  return response.status(204).send();
+
 });
 
-app.post("/repositories/:id/like", (request, response) => {
+app.post("/repositories/:id/like", (request, response) => { // Rota que aumenta o número de likes
   
     const {id} = request.params;
 
