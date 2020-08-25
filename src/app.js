@@ -35,7 +35,7 @@ app.post("/repositories", (request, response) => {
 app.put("/repositories/:id", (request, response) => {
 
   const {id} = request.params;
-  const {title, url, techs, likes} = request.body;
+  const {title, url, techs} = request.body;
 
   const repositoryIndex = repositories.findIndex(repository => repository.id === id);
 
@@ -45,8 +45,8 @@ app.put("/repositories/:id", (request, response) => {
   }
 
   const repository = {
-    title,
     url,
+    title,
     techs
   };
 
@@ -60,18 +60,22 @@ app.put("/repositories/:id", (request, response) => {
 app.delete("/repositories/:id", (request, response) => {
   
   const {id} = request.params;
-  const {title, url, techs} = request.body;
+  
+  const repositoryIndex = repositories.findIndex(repository => repository.id === id); // Retorna -1, por isso a verificação se repositoryIndex < 0
 
-  const repositoryIndex = repositories.findIndex(repository => repository.id === id);
-
-  if(repositoryIndex < 0)
+  if(repositoryIndex >= 0)
   {
-    return response.status(400).json({error: 'Project not found'});
+    repositories.splice(repositoryIndex, 1);
   }
 
-  repositories.splice(repositoryIndex, repositories.length);
+  else
+  {
+    return response.status(400).json({error: 'Repository does not exist.'})
+  }
 
   return response.status(204).send();
+
+  
 
 });
 
