@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-const { v4: uuid } = require('uuid');
+const { uuid } = require("uuidv4");
 
 const app = express();
 
@@ -39,21 +39,24 @@ app.put("/repositories/:id", (request, response) => {
 
   const repositoryIndex = repositories.findIndex(repository => repository.id === id);
 
-  if(repositoryIndex < 0)
+  // Verificação da não existência do repositório:
+  
+  if (repositoryIndex === -1)
   {
-    return response.status(400).json({error: 'Project not found'});
+    return response.status(400).json({error: 'Repository does not exist.'});
   }
+  
 
   const repository = {
-    url,
+    id,
     title,
-    techs
+    url,
+    techs,
+    likes: repositories[repositoryIndex].likes // Impedindo a alteração manual do número de likes
   };
 
-  repository.likes = 0;
-
   repositories[repositoryIndex] = repository;
-
+ 
   return response.json(repository);
 });
 
@@ -67,7 +70,6 @@ app.delete("/repositories/:id", (request, response) => {
   {
     repositories.splice(repositoryIndex, 1);
   }
-
   else
   {
     return response.status(400).json({error: 'Repository does not exist.'})
@@ -75,24 +77,22 @@ app.delete("/repositories/:id", (request, response) => {
 
   return response.status(204).send();
 
-  
-
 });
 
 app.post("/repositories/:id/like", (request, response) => { // Rota que aumenta o número de likes
   
     const {id} = request.params;
 
-    const repository = repositories.find(repository => repository.id === id);
+    const repositoryIndex = repositories.findIndex(repository => repository.id === id);
 
-    if(!repository)
+    if(repositoryIndex === -1)
     {
-      return response.status(400).send();
+      return response.status(400).json({error: 'Repository does not exist.'});
     }
 
-    repository.likes++;
+    repositories[repositoryIndex].likes += 1;
 
-    return response.json(repository);
+    return response.json(repositories[repositoryIndex]);
 });
 
 module.exports = app;
